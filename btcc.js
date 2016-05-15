@@ -1,5 +1,9 @@
 const crypto = require('crypto'),
-      request = require('request');
+      request = require('request'),
+      v = require('validator.js');
+
+const validator = v.validator(),
+      is = v.Assert;
 
 function pick(o, name) {
   return o.hasOwnProperty(name) ? o[name] : '';
@@ -60,6 +64,13 @@ BTCC.prototype._request = function(params, callback) {
 
 const VALID_PURCHASE_ORDER_OPTIONS = ['price', 'currency', 'notificationURL','returnURL', 'externalKey', 'itemDesc', 'phoneNumber', 'settlementType'];
 
+// TODO: add number / https validation
+const CREATE_PURCHASE_ORDER_CONSTRAINT = {
+  price: is.required(),
+  currency: [ is.required(), is.isString(), is.choice(['CNY', 'USD', 'SGD', 'MYR', 'BTC'])],
+  notificationURL: is.required()
+};
+
 /*
  * https://www.btcc.com/apidocs/justpay-payment-gateway-json-rpc-api
  *
@@ -74,9 +85,14 @@ const VALID_PURCHASE_ORDER_OPTIONS = ['price', 'currency', 'notificationURL','re
  * settlementType  number  否   商家收款方式，支持两种模式. 默认值为0，款项将以比特币的形式直接转到商家的毕加索钱包里; 值为1时，款项会以法币形式依照合同规定，扣除手续费后，定时转给商家. 当以法币形式支付时，最小的比特币支付限额为0.0001个.
 */
 BTCC.prototype.createPurchaseOrder = function(args, callback) {
-  // TODO: add parameter validation here
-  const params = VALID_PURCHASE_ORDER_OPTIONS.map(n => pick(args, n));
-  this._request(params, callback);
+  const result = validator.validate(args, CREATE_PURCHASE_ORDER_CONSTRAINT);
+  if (result === true) {
+    const params = VALID_PURCHASE_ORDER_OPTIONS.map(n => pick(args, n));
+    this._request(params, callback);
+  } else {
+    console.log(JSON.stringify(result));
+    throw result;
+  }
 }
 
 module.exports = BTCC;

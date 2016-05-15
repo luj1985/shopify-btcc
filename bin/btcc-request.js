@@ -13,8 +13,8 @@ var btcc = new BTCC(accesskey, secretkey);
 btcc.createPurchaseOrder({
   "price": 0.0001,
   "currency": "BTC",
-  "notificationURL": "http://localhost:3000/",
-  "returnURL": "http://localhost:3000/",
+  "notificationURL": "https://localhost:3000/",
+  "returnURL": "https://localhost:3000/",
   "externalKey": "test",
   "itemDesc": "Requst for demo",
   "phoneNumber": "12345678901",
