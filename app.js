@@ -1,15 +1,15 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var helmet = require('helmet');
+const express = require('express'),
+      path = require('path'),
+      favicon = require('serve-favicon'),
+      logger = require('morgan'),
+      cookieParser = require('cookie-parser'),
+      bodyParser = require('body-parser'),
+      helmet = require('helmet');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+const index = require('./routes/index'),
+      shopify = require('./routes/shopify');
 
-var app = express();
+const app = express();
 
 app.use(helmet());
 
@@ -26,8 +26,8 @@ app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+app.use('/', index);
+app.use('/shopify', shopify);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
