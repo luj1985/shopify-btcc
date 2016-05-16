@@ -1,11 +1,13 @@
 const express = require('express'),
       request = require('request'),
+      crypto = require('crypto'),
       BTCC = require('../btcc'),
       router = express.Router();
 
 const BTCC_ACCESS_KEY = process.env.BTCC_ACCESS_KEY;
 const BTCC_SECRET_KEY = process.env.BTCC_SECRET_KEY;
 const HOSTED_ENDPOINT = process.env.HOSTED_ENDPOINT;
+const SHOPIFY_HMAC = process.env.SHOPIFY_HMAC;
 const debug = process.env.NODE_DEBUG;
 
 if (!BTCC_ACCESS_KEY || !BTCC_SECRET_KEY) {
@@ -14,6 +16,10 @@ if (!BTCC_ACCESS_KEY || !BTCC_SECRET_KEY) {
 
 if (!HOSTED_ENDPOINT) {
   throw new Error('No host endpoint defined');
+}
+
+if (!SHOPIFY_HMAC) {
+  throw new Error('No Shopify HMAC spcificied');
 }
 
 const btcc = new BTCC(BTCC_ACCESS_KEY, BTCC_SECRET_KEY);
@@ -81,8 +87,34 @@ router.post('/', (req, res, next) => {
 
 
 // send success response to Shopify async
-function shopifyAsyncConfirm(url, callback) {
-  request(url, (err, res, body) => {
+function shopifyAsyncConfirm(purchase, callback) {
+  const callbackUrl = purchase.x_url_callback;
+  const values = {
+    x_account_id: purchase.x_account_id,
+    x_reference: purchase.x_reference,
+    x_currency: purchase.x_currency,
+    x_test: purchase.x_test,
+    x_amount: purchase.x_amount,
+    x_gateway_reference: 'https://www.btcc.com',
+    x_timestamp: new Date().toISOString(),
+    x_result: 'completed'
+  };
+
+  const message = Object.keys(values)
+                        .sort()
+                        .map(name => name + values[name])
+                        .join('');
+
+  const sha256 = crypto.createHmac('sha256', SHOPIFY_HMAC);
+  values.x_signature = sha256.update(message).digest('hex');
+
+  console.log(values);
+  console.log(message);
+  console.log('shopify hmac: ' + values.x_signature);
+
+  const reference = purchase.x_reference;
+
+  request.post(callbackUrl, { form: values }, (err, res, body) => {
     if (!err && res.statusCode === 200) {
       console.info(`Shopify reference ${reference} confirmed`);
     } else {
@@ -107,7 +139,7 @@ router.get('/btcc/success/:reference', (req, res, next) => {
     const tran = trans[reference];
     if (tran) {
       trans[reference] = null;
-      shopifyAsyncConfirm(tran.x_url_callback);
+      shopifyAsyncConfirm(tran);
       res.redirect(tran.x_url_complete);
     } else {
       res.status(400).send('Invalid merchant reference');
