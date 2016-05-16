@@ -108,10 +108,6 @@ function shopifyAsyncConfirm(purchase, callback) {
   const sha256 = crypto.createHmac('sha256', SHOPIFY_HMAC);
   values.x_signature = sha256.update(message).digest('hex');
 
-  console.log(values);
-  console.log(message);
-  console.log('shopify hmac: ' + values.x_signature);
-
   const reference = purchase.x_reference;
 
   request.post(callbackUrl, { form: values }, (err, res, body) => {
