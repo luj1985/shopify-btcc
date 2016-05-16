@@ -1,4 +1,5 @@
 const express = require('express'),
+      request = require('request'),
       BTCC = require('../btcc'),
       router = express.Router();
 
@@ -79,6 +80,22 @@ router.post('/', (req, res, next) => {
 });
 
 
+// send success response to Shopify async
+function shopifyAsyncConfirm(url, callback) {
+  request(url, (err, res, body) => {
+    if (!err && res.statusCode === 200) {
+      console.info(`Shopify reference ${reference} confirmed`);
+    } else {
+      console.error(`Shopify reference ${reference} async confirm failed`);
+      console.error(err);
+      console.error(body);
+    }
+    if (callback) {
+      callback.apply(null, arguments);
+    }
+  });
+}
+
 // XXX: use query string to pass reference ?
 router.get('/btcc/success/:reference', (req, res, next) => {
   const reference = req.params.reference;
@@ -90,7 +107,7 @@ router.get('/btcc/success/:reference', (req, res, next) => {
     const tran = trans[reference];
     if (tran) {
       trans[reference] = null;
-      // TODO: send success response to Shopify async
+      shopifyAsyncConfirm(tran.x_url_callback);
       res.redirect(tran.x_url_complete);
     } else {
       res.status(400).send('Invalid merchant reference');
