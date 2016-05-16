@@ -66,9 +66,9 @@ const VALID_PURCHASE_ORDER_OPTIONS = ['price', 'currency', 'notificationURL','re
 
 // TODO: add number / https validation
 const CREATE_PURCHASE_ORDER_CONSTRAINT = {
-  price: is.required(),
+  price: [ is.required() ],
   currency: [ is.required(), is.isString(), is.choice(['CNY', 'USD', 'SGD', 'MYR', 'BTC'])],
-  notificationURL: is.required()
+  notificationURL: [ is.required(), is.isString() ]
 };
 
 /*

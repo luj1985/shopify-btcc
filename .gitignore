@@ -14,3 +14,4 @@ npm-debug.log
 
 # shell contains access key, secret key
 bin/start-btcc-request.sh
+npm-start.sh

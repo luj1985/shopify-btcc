@@ -1,0 +1,22 @@
+<div>
+  <h2>Request</h2>
+  <form class="shopify-form" method="post" action="/shopify">
+    <fieldset>
+
+      <div>
+        <button type="submit">Checkout</button>
+      </div>
+
+      {{#each fields}}
+      <div>
+        <label for="{{ name }}">{{ text }}</label>
+        <input id="{{ name }}" name="{{ name }}" type="text" value="{{ value }}">
+      </div>
+      {{/each}}
+
+      <div>
+        <button type="submit">Checkout</button>
+      </div>
+    </fieldset>
+  </form>
+</div>
