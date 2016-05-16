@@ -139,7 +139,7 @@ module.exports.createCheckout = function() {
   }, {
     "name": "x_url_complete",
     "text": "URL Complete",
-    "value": "https://myshopify.io/orders/1/done"
+    "value": "http://localhost:3000/shopify/finished"
   }, {
     "name": "x_timestamp",
     "text": "Timestamp",

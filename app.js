@@ -3,6 +3,7 @@ const express = require('express'),
       favicon = require('serve-favicon'),
       logger = require('morgan'),
       cookieParser = require('cookie-parser'),
+      session = require('express-session'),
       bodyParser = require('body-parser'),
       helmet = require('helmet');
 
@@ -23,6 +24,14 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({
+  // TODO: generate UUID
+  secret: 'btcc',
+  cookie: { maxAge: 60 * 60 * 1000 }, // 1h
+  resave: false,
+//  cookie: { secure: true }
+  saveUninitialized: true,
+}));
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
