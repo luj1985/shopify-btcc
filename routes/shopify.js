@@ -8,6 +8,7 @@ const BTCC_ACCESS_KEY = process.env.BTCC_ACCESS_KEY;
 const BTCC_SECRET_KEY = process.env.BTCC_SECRET_KEY;
 const HOSTED_ENDPOINT = process.env.HOSTED_ENDPOINT;
 const SHOPIFY_HMAC = process.env.SHOPIFY_HMAC;
+
 const debug = process.env.NODE_DEBUG;
 
 if (!BTCC_ACCESS_KEY || !BTCC_SECRET_KEY) {
@@ -135,8 +136,18 @@ router.get('/btcc/success/:reference', (req, res, next) => {
     const tran = trans[reference];
     if (tran) {
       trans[reference] = null;
-      shopifyAsyncConfirm(tran);
-      res.redirect(tran.x_url_complete);
+
+      shopifyAsyncConfirm(tran, (err, storeRes, body) => {
+        if (storeRes.statusCode === 200) {
+          res.redirect(tran.x_url_complete);
+        } else {
+          res.status(400).send('Shopify store not confirmed');
+        }
+      });
+
+      // XXX: or redirect back immediately
+      // shopifyAsyncConfirm(tran);
+      // res.redirect(tran.x_url_complete);
     } else {
       res.status(400).send('Invalid merchant reference');
     }
