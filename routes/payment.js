@@ -48,6 +48,9 @@ router.post('/', (req, res, next) => {
       "settlementType": 0
     };
 
+    console.log('Shopify request values: ');
+    console.log(purchase);
+
     btcc.createPurchaseOrder(btccPurchaseRequest, (btccErr, btccRes, btccBody) => {
       if (btccRes.statusCode === 200) {
         const payment = JSON.parse(btccBody);

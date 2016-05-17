@@ -30,11 +30,9 @@ Shopify.prototype.completePurchase = function(purchase, id, callback) {
     x_result: 'completed'
   };
 
-
   values.x_signature = this._sign(values);
 
-
-  console.log('request completed !');
+  console.log('shopify response value');
   console.log(values);
 
   const reference = purchase.x_reference;
