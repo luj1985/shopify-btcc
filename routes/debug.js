@@ -134,23 +134,19 @@ function createCheckout() {
   }, {
     "name": "x_url_callback",
     "text": "URL Callback",
-    "value": "http://localhost:3000/debug/callback"
+    "value": "https://shopify-btc.herokuapp.com/debug/callback"
   }, {
     "name": "x_url_cancel",
     "text": "URL Cancel",
-    "value": "http://localhost:3000/debug/cancel"
+    "value": "https://shopify-btc.herokuapp.com/debug/cancel"
   }, {
     "name": "x_url_complete",
     "text": "URL Complete",
-    "value": "http://localhost:3000/debug/finished"
+    "value": "https://shopify-btc.herokuapp.com/debug/finished"
   }, {
     "name": "x_timestamp",
     "text": "Timestamp",
     "value": "2014-03-24 12:13:12 +00:00"
-  }, {
-    "name": "secret_key",
-    "text": "Secret Key",
-    "value": "iU44RWxeik"
   }];
 }
 

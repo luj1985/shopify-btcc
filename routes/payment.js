@@ -61,7 +61,7 @@ router.post('/', (req, res, next) => {
         }
       } else {
         console.error(btccBody);
-        res.status(500).send(btccBody);
+        res.status(btccRes.statusCode).send(btccBody);
       }
     });
   }
@@ -84,7 +84,7 @@ router.get('/success/:reference', (req, res, next) => {
         if (storeRes.statusCode === 200) {
           res.redirect(tran.x_url_complete);
         } else {
-          res.status(400).send('Shopify store not confirmed');
+          res.status(storeRes.statusCode).send(body);
         }
       });
 
@@ -103,7 +103,10 @@ router.get('/cancel/:reference', (req, res, next) => {
 });
 
 router.get('/notification/:reference', (req, res, next) => {
-  res.status(500).send("Not implemented yet");
+  const reference = req.params.reference;
+  console.log('notification for: ' + reference);
+  console.log(res.body);
+  res.send('got it');
 });
 
 module.exports = router;
