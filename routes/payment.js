@@ -80,7 +80,8 @@ router.get('/success/:reference', (req, res, next) => {
     if (tran) {
       delete trans[reference];
 
-      shopify.completePurchase(tran, (err, storeRes, body) => {
+      const id = req.query.purchaseorder_id || new Date().getTime().toString();
+      shopify.completePurchase(tran, id, (err, storeRes, body) => {
         if (storeRes.statusCode === 200) {
           res.redirect(tran.x_url_complete);
         } else {

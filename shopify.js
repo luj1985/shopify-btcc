@@ -18,19 +18,24 @@ Shopify.prototype._sign = function(values) {
 }
 
 // send success response to Shopify async
-Shopify.prototype.completePurchase = function(purchase, callback) {
+Shopify.prototype.completePurchase = function(purchase, id, callback) {
   const values = {
     x_account_id: purchase.x_account_id,
     x_reference: purchase.x_reference,
     x_currency: purchase.x_currency,
     x_test: purchase.x_test,
     x_amount: purchase.x_amount,
-    x_gateway_reference: 'https://www.btcc.com',
+    x_gateway_reference: id,
     x_timestamp: new Date().toISOString(),
     x_result: 'completed'
   };
 
+
   values.x_signature = this._sign(values);
+
+
+  console.log('request completed !');
+  console.log(values);
 
   const reference = purchase.x_reference;
   request.post(purchase.x_url_callback, { form: values }, (err, res, body) => {
