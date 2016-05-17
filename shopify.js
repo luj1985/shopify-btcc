@@ -32,8 +32,8 @@ Shopify.prototype.completePurchase = function(purchase, id, callback) {
 
   values.x_signature = this._sign(values);
 
-  console.log('shopify response value');
-  console.log(values);
+  // console.log('shopify response value');
+  // console.log(values);
 
   const reference = purchase.x_reference;
   request.post(purchase.x_url_callback, { form: values }, (err, res, body) => {
