@@ -51,11 +51,14 @@ Shopify.prototype.cancelPurchase = function() {
   throw new Error('not implement yet');
 };
 
+const debug = process.env.NODE_DEBUG;
+
 Shopify.prototype.validateSignature = function(purchase) {
+  if (debug) { return true; }
+
   const x_signature = purchase.x_signature;
   const signature = this._sign(purchase);
-  // return x_signature === signature;
-  return true;
+  return x_signature === signature;
 };
 
 module.exports = Shopify;
