@@ -8,7 +8,7 @@ const express = require('express'),
       helmet = require('helmet');
 
 const index = require('./routes/index'),
-      shopify = require('./routes/shopify');
+      payment = require('./routes/payment');
 
 const app = express();
 
@@ -36,7 +36,18 @@ app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/shopify', shopify);
+app.use('/payment', payment);
+
+
+
+
+const debug = process.env.NODE_DEBUG;
+if (debug) {
+  app.use('/debug', require('./routes/debug'));
+}
+
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

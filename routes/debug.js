@@ -1,4 +1,7 @@
-module.exports.createCheckout = function() {
+const express = require('express'),
+      router = express.Router();
+
+function createCheckout() {
   return [{
     "name": "x_account_id",
     "text": "Account ID",
@@ -131,15 +134,15 @@ module.exports.createCheckout = function() {
   }, {
     "name": "x_url_callback",
     "text": "URL Callback",
-    "value": "https://myshopify.io/ping/1"
+    "value": "http://localhost:3000/debug/callback"
   }, {
     "name": "x_url_cancel",
     "text": "URL Cancel",
-    "value": "https://myshopify.io"
+    "value": "http://localhost:3000/debug/cancel"
   }, {
     "name": "x_url_complete",
     "text": "URL Complete",
-    "value": "http://localhost:3000/shopify/finished"
+    "value": "http://localhost:3000/debug/finished"
   }, {
     "name": "x_timestamp",
     "text": "Timestamp",
@@ -149,4 +152,31 @@ module.exports.createCheckout = function() {
     "text": "Secret Key",
     "value": "iU44RWxeik"
   }];
-};
+}
+
+
+console.info('Debug enabled in shopify.js');
+console.info('Go to "http(s)://<localhost>:<3000>/debug" to do test');
+
+router.get('/', (req, res, next) => {
+  res.render('shopify-sim', {
+    title: 'Shopify Simulator',
+    fields: createCheckout()
+  });
+});
+
+router.post('/callback', (req, res, next) => {
+  res.send('got it');
+});
+
+router.get('/cancel', (req, res, next) => {
+  res.send('got it');
+});
+
+router.get('/finished', (req, res, next) => {
+  res.send('Deal !');
+});
+
+
+
+module.exports = router;
