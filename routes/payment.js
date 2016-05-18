@@ -1,6 +1,7 @@
 const express = require('express'),
       // sub app to get 'mountpath'
       router = express(),
+      winston = require('winston'),
       BTCC = require('../btcc'),
       Shopify = require('../shopify');
 
@@ -50,8 +51,7 @@ router.post('/', (req, res, next) => {
       "settlementType": 0
     };
 
-    console.log('Shopify request values: ');
-    console.log(purchase);
+    winston.debug('Shopify request values: ', purchase);
 
     btcc.createPurchaseOrder(btccPurchaseRequest, (btccErr, btccRes, btccBody) => {
       if (btccRes.statusCode === 200) {
@@ -61,11 +61,13 @@ router.post('/', (req, res, next) => {
           res.redirect(result.url);
         } else {
           // TODO: add error page rendering.
-          console.error(btccBody);
+          winston.error('BTCC createPurchaseOrder API Error');
+          winston.error(btccBody);
           res.status(500).send(btccBody);
         }
       } else {
-        console.error(btccBody);
+        winston.error('BTCC createPurchaseOrder API Error');
+        winston.error(btccBody);
         res.status(btccRes.statusCode).send(btccBody);
       }
     });
@@ -77,15 +79,17 @@ router.post('/', (req, res, next) => {
 router.get('/success/:reference', (req, res, next) => {
   const reference = req.params.reference;
   if (!reference) {
-    console.error("BTCC returnURL calback doesn't have reference defined");
-    res.status(400).send('No merchant reference available');
+    winston.error("BTCC returnURL callback doesn't have reference defined", req.body);
+    res.status(400).send('No reference available');
   } else {
     const trans = req.session.trans || {};
     const tran = trans[reference];
     if (tran) {
       delete trans[reference];
-
       const id = req.query.purchaseorder_id || new Date().getTime().toString();
+
+      winston.debug('BTCC purcase order id: ', id);
+
       shopify.completePurchase(tran, id, (err, storeRes, body) => {
         if (storeRes.statusCode === 200) {
           res.redirect(tran.x_url_complete);
@@ -104,15 +108,15 @@ router.get('/success/:reference', (req, res, next) => {
   }
 });
 
-router.get('/cancel/:reference', (req, res, next) => {
-  res.status(500).send("Not implemented yet");
+router.post('/notification/:reference', (req, res, next) => {
+  const reference = req.params.reference;
+  // XXX: This connection was established between Payment Gateway and BTCC JustPay
+  winston.debug(`notification for: ${reference}`, req.body);
+  res.status(200).send('Notification Got it');
 });
 
-router.get('/notification/:reference', (req, res, next) => {
-  const reference = req.params.reference;
-  console.log('notification for: ' + reference);
-  console.log(res.body);
-  res.send('got it');
+router.get('/cancel/:reference', (req, res, next) => {
+  res.status(500).send("Not implemented yet");
 });
 
 module.exports = router;

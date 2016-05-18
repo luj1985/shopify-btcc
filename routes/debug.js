@@ -1,5 +1,8 @@
 const express = require('express'),
-      router = express.Router();
+      router = express.Router(),
+      winston = require('winston');
+
+const HOSTED_ENDPOINT = process.env.HOSTED_ENDPOINT
 
 function createCheckout() {
   return [{
@@ -9,11 +12,11 @@ function createCheckout() {
   }, {
     "name": "x_currency",
     "text": "Currency",
-    "value": "BTC"
+    "value": "CNY"
   }, {
     "name": "x_amount",
     "text": "Amount",
-    "value": "0.0001"
+    "value": 0.01
   }, {
     "name": "x_reference",
     "text": "Reference",
@@ -22,19 +25,11 @@ function createCheckout() {
   }, {
     "name": "x_shop_country",
     "text": "Shop Country",
-    "value": "US"
-  }, {
-    "name": "x_shop_name",
-    "text": "Shop Name",
-    "value": "Widgets Inc"
-  }, {
-    "name": "x_transaction_type",
-    "text": "Transaction Type",
-    "value": "sale"
+    "value": "CN"
   }, {
     "name": "x_description",
     "text": "Description",
-    "value": "Order"
+    "value": "Shopify-JustPay Gateway debug"
   }, {
     "name": "x_invoice",
     "text": "Invoice",
@@ -42,117 +37,33 @@ function createCheckout() {
   }, {
     "name": "x_test",
     "text": "Test",
-    "value": "true"
-  }, {
-    "name": "x_customer_first_name",
-    "text": "Customer First Name",
-    "value": "Boris"
-  }, {
-    "name": "x_customer_last_name",
-    "text": "Customer Last Name",
-    "value": "Slobodin"
+    "value": true
   }, {
     "name": "x_customer_email",
     "text": "Customer Email",
-    "value": "boris.slobodin@example.com"
+    "value": "test@btcc.com"
   }, {
     "name": "x_customer_phone",
     "text": "Customer Phone",
-    "value": "16139876543"
-  }, {
-    "name": "x_customer_shipping_city",
-    "text": "Shipping City",
-    "value": "Toronto"
-  }, {
-    "name": "x_customer_shipping_company",
-    "text": "Shipping Company",
-    "value": "Shopify Toronto"
-  }, {
-    "name": "x_customer_shipping_address1",
-    "text": "Shipping Address 1",
-    "value": "241 Spadina Ave"
-  }, {
-    "name": "x_customer_shipping_address2",
-    "text": "Shipping Address 2",
-    "value": "Suite 200"
-  }, {
-    "name": "x_customer_shipping_state",
-    "text": "Shipping State",
-    "value": "true"
-  }, {
-    "name": "x_customer_shipping_zip",
-    "text": "Shipping Zip",
-    "value": "M5T 3A8"
-  }, {
-    "name": "x_customer_shipping_country",
-    "text": "Shipping Country",
-    "value": "CA"
-  }, {
-    "name": "x_customer_shipping_phone",
-    "text": "Shipping Phone",
-    "value": "+1-416-123-4567"
-  }, {
-    "name": "x_customer__billing_first_name",
-    "text": "Billing Customer First Name",
-    "value": "Boris"
-  }, {
-    "name": "x_customer_billing_last_name",
-    "text": "Billing Customer Last Name",
-    "value": "Slobodin"
-  }, {
-    "name": "x_customer_billing_city",
-    "text": "Billing City",
-    "value": "Toronto"
-  }, {
-    "name": "x_customer_billing_company",
-    "text": "Billing Company",
-    "value": "Shopify Toronto"
-  }, {
-    "name": "x_customer_billing_address1",
-    "text": "Billing Address 1",
-    "value": "241 Spadina Ave"
-  }, {
-    "name": "x_customer_billing_address2",
-    "text": "Billing Address 2",
-    "value": "Suite 200"
-  }, {
-    "name": "x_customer_billing_state",
-    "text": "Billing State",
-    "value": "true"
-  }, {
-    "name": "x_customer_billing_zip",
-    "text": "Billing Zip",
-    "value": "M5T 3A8"
-  }, {
-    "name": "x_customer_billing_country",
-    "text": "Billing Country",
-    "value": "CA"
-  }, {
-    "name": "x_customer_billing_phone",
-    "text": "Billing Phone",
-    "value": "+1-416-123-4567"
+    "value": "1234567891"
   }, {
     "name": "x_url_callback",
     "text": "URL Callback",
-    "value": "https://shopify-btc.herokuapp.com/debug/callback"
+    "value": `${HOSTED_ENDPOINT}/debug/callback`
   }, {
     "name": "x_url_cancel",
     "text": "URL Cancel",
-    "value": "https://shopify-btc.herokuapp.com/debug/cancel"
+    "value": `${HOSTED_ENDPOINT}/debug/cancel`
   }, {
     "name": "x_url_complete",
     "text": "URL Complete",
-    "value": "https://shopify-btc.herokuapp.com/debug/finished"
-  }, {
-    "name": "x_timestamp",
-    "text": "Timestamp",
-    "value": "2014-03-24 12:13:12 +00:00"
+    "value": `${HOSTED_ENDPOINT}/debug/finished`
   }];
 }
 
 
-console.info('Debug enabled in shopify.js');
-console.info('Go to "http(s)://<localhost>:<3000>/debug" to do test');
+console.info('Debug enabled !!');
+console.info(`Open "${HOSTED_ENDPOINT}/debug" to do JustPay test`);
 
 router.get('/', (req, res, next) => {
   res.render('shopify-sim', {
@@ -162,15 +73,18 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/callback', (req, res, next) => {
-  res.send('got it');
+  winston.info('shopify smiulator callback: ', req.body);
+  res.send('Checkout confirmed !!!');
 });
 
 router.get('/cancel', (req, res, next) => {
-  res.send('got it');
+  winston.info('shopify smiulator cancel: ', req.query);
+  res.send('Checkout cancelled !!!');
 });
 
 router.get('/finished', (req, res, next) => {
-  res.send('Deal !');
+  winston.info('shopify smiulator finished: ', req.query);
+  res.send('Deal !!!');
 });
 
 

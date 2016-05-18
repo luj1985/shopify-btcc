@@ -5,10 +5,13 @@ const express = require('express'),
       cookieParser = require('cookie-parser'),
       session = require('express-session'),
       bodyParser = require('body-parser'),
-      helmet = require('helmet');
+      helmet = require('helmet'),
+      winston = require('winston');
 
 const index = require('./routes/index'),
       payment = require('./routes/payment');
+
+const debug = process.env.NODE_DEBUG;
 
 const app = express();
 
@@ -25,11 +28,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(session({
-  // TODO: generate UUID
+  // TODO: or generate UUID ?
   secret: 'btcc',
   cookie: { maxAge: 60 * 60 * 1000 }, // 1h
   resave: false,
-//  cookie: { secure: true }
+  cookie: { secure: !debug },
   saveUninitialized: true,
 }));
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
@@ -39,10 +42,8 @@ app.use('/', index);
 app.use('/payment', payment);
 
 
-
-
-const debug = process.env.NODE_DEBUG;
 if (debug) {
+  winston.level = 'debug';
   app.use('/debug', require('./routes/debug'));
 }
 

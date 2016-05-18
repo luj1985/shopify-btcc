@@ -1,5 +1,6 @@
 const request = require('request'),
-      crypto = require('crypto');
+      crypto = require('crypto'),
+      winston = require('winston');
 
 function Shopify(hmac) {
   this.SHOPIFY_HMAC = hmac;
@@ -29,20 +30,17 @@ Shopify.prototype.completePurchase = function(purchase, id, callback) {
     x_timestamp: new Date().toISOString(),
     x_result: 'completed'
   };
-
   values.x_signature = this._sign(values);
 
-  // console.log('shopify response value');
-  // console.log(values);
+  winston.debug('notify Shopify purchase finished: ', purchase.x_url_callback, values);
 
   const reference = purchase.x_reference;
   request.post(purchase.x_url_callback, { form: values }, (err, res, body) => {
     if (!err && res.statusCode === 200) {
-      console.info(`Shopify reference ${reference} confirmed`);
+      winston.info(`Shopify reference ${reference} confirmed`);
     } else {
-      console.error(`Shopify reference ${reference} async confirm failed`);
-      console.error(err);
-      console.error(body);
+      winston.error(`Shopify reference ${reference} async confirm failed`);
+      winston.error(body);
     }
     if (callback) {
       callback.call(null, err, res, body);
@@ -57,6 +55,7 @@ Shopify.prototype.cancelPurchase = function() {
 const debug = process.env.NODE_DEBUG;
 
 Shopify.prototype.validateSignature = function(purchase) {
+  // shopify-simulator doesn't have signature appended.
   if (debug) { return true; }
 
   const x_signature = purchase.x_signature;

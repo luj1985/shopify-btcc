@@ -1,5 +1,6 @@
 const crypto = require('crypto'),
       request = require('request'),
+      winston = require('winston'),
       v = require('validator.js');
 
 const validator = v.validator(),
@@ -17,7 +18,7 @@ function BTCC(accesskey, secretkey, endpoint) {
   if (!endpoint) {
     endpoint = 'https://api.btcchina.com/api.php/payment';
   } else {
-    console.info(`switch to endpoint ${endpoint}`);
+    winston.info(`switch to endpoint ${endpoint}`);
   }
 
   this.BTCC_PAYMENT_ENDPOINT = endpoint;
@@ -78,7 +79,8 @@ BTCC.prototype.createPurchaseOrder = function(args, callback) {
     const params = VALID_PURCHASE_ORDER_OPTIONS.map(n => pick(args, n));
     this._request(params, callback);
   } else {
-    console.log(JSON.stringify(result));
+    winston.warn('createPurchaseOrder parameter validation failed', result);
+    // Or render error page ?
     throw result;
   }
 }
