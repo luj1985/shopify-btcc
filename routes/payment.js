@@ -37,12 +37,14 @@ router.post('/', (req, res, next) => {
     // User may fire several transaction at the same time.
     session.trans[reference] = purchase;
 
+    const externalKey = reference + '_' + Date.now();
+
     const btccPurchaseRequest = {
       "price": purchase.x_amount,
       "currency": purchase.x_currency,
       "notificationURL": HOSTED_ENDPOINT + mountpath + "/notification/" + reference,
       "returnURL": HOSTED_ENDPOINT + mountpath + "/success/" + reference,
-      "externalKey": reference,
+      "externalKey": externalKey,
       "itemDesc": purchase.x_description,
       "phoneNumber": purchase.x_customer_phone,
       "settlementType": 0
