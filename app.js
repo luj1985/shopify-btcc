@@ -1,19 +1,19 @@
-const express = require('express'),
-      path = require('path'),
-      favicon = require('serve-favicon'),
-      logger = require('morgan'),
-      cookieParser = require('cookie-parser'),
-      session = require('express-session'),
-      bodyParser = require('body-parser'),
-      helmet = require('helmet'),
-      winston = require('winston');
+var express = require('express'),
+    path = require('path'),
+    favicon = require('serve-favicon'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    session = require('express-session'),
+    bodyParser = require('body-parser'),
+    helmet = require('helmet'),
+    winston = require('winston');
 
-const index = require('./routes/index'),
-      payment = require('./routes/payment');
+var index = require('./routes/index'),
+    payment = require('./routes/payment');
 
-const debug = process.env.NODE_DEBUG;
+var debug = process.env.NODE_DEBUG;
 
-const app = express();
+var app = express();
 
 app.use(helmet());
 
@@ -32,7 +32,7 @@ app.use(session({
   secret: 'btcc',
   cookie: { maxAge: 60 * 60 * 1000 }, // 1h
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: true
 }));
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -40,17 +40,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', index);
 app.use('/payment', payment);
 
-
 if (debug) {
   winston.level = 'debug';
   app.use('/debug', require('./routes/debug'));
 }
 
-
-
-
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
@@ -61,7 +57,7 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
+  app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -72,13 +68,12 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
     error: {}
   });
 });
-
 
 module.exports = app;

@@ -1,26 +1,26 @@
-const request = require('request'),
-      crypto = require('crypto'),
-      winston = require('winston');
+var request = require('request'),
+    crypto = require('crypto'),
+    winston = require('winston');
 
 function Shopify(hmac) {
   this.SHOPIFY_HMAC = hmac;
 }
 
 // https://help.shopify.com/api/sdks/hosted-payment-sdk/develop-gateway#gateway-signing-mechanism
-Shopify.prototype._sign = function(values) {
-  const message = Object.keys(values)
-                        .filter(name => /^x_/.test(name) && name !== 'x_signature')
-                        .sort()
-                        .map(name => name + values[name])
-                        .join('');
+Shopify.prototype._sign = function (values) {
+  var message = Object.keys(values).filter(function (name) {
+    return (/^x_/.test(name) && name !== 'x_signature');
+  }).sort().map(function (name) {
+    return name + values[name];
+  }).join('');
 
-  const sha256 = crypto.createHmac('sha256', this.SHOPIFY_HMAC);
+  var sha256 = crypto.createHmac('sha256', this.SHOPIFY_HMAC);
   return sha256.update(message).digest('hex');
-}
+};
 
 // send success response to Shopify async
-Shopify.prototype.completePurchase = function(purchase, id, callback) {
-  const values = {
+Shopify.prototype.completePurchase = function (purchase, id, callback) {
+  var values = {
     x_account_id: purchase.x_account_id,
     x_reference: purchase.x_reference,
     x_currency: purchase.x_currency,
@@ -34,12 +34,12 @@ Shopify.prototype.completePurchase = function(purchase, id, callback) {
 
   winston.debug('notify Shopify purchase finished: ', purchase.x_url_callback, values);
 
-  const reference = purchase.x_reference;
-  request.post(purchase.x_url_callback, { form: values }, (err, res, body) => {
+  var reference = purchase.x_reference;
+  request.post(purchase.x_url_callback, { form: values }, function (err, res, body) {
     if (!err && res.statusCode === 200) {
-      winston.info(`Shopify reference ${reference} confirmed`);
+      winston.info('Shopify reference ' + reference + ' confirmed');
     } else {
-      winston.error(`Shopify reference ${reference} async confirm failed`);
+      winston.error('Shopify reference ' + reference + ' async confirm failed');
       winston.error(body);
     }
     if (callback) {
@@ -48,18 +48,20 @@ Shopify.prototype.completePurchase = function(purchase, id, callback) {
   });
 };
 
-Shopify.prototype.cancelPurchase = function() {
+Shopify.prototype.cancelPurchase = function () {
   throw new Error('not implement yet');
 };
 
-const debug = process.env.NODE_DEBUG;
+var debug = process.env.NODE_DEBUG;
 
-Shopify.prototype.validateSignature = function(purchase) {
+Shopify.prototype.validateSignature = function (purchase) {
   // shopify-simulator doesn't have signature appended.
-  if (debug) { return true; }
+  if (debug) {
+    return true;
+  }
 
-  const x_signature = purchase.x_signature;
-  const signature = this._sign(purchase);
+  var x_signature = purchase.x_signature;
+  var signature = this._sign(purchase);
   return x_signature === signature;
 };
 

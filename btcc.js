@@ -1,10 +1,10 @@
-const crypto = require('crypto'),
-      request = require('request'),
-      winston = require('winston'),
-      v = require('validator.js');
+var crypto = require('crypto'),
+    request = require('request'),
+    winston = require('winston'),
+    v = require('validator.js');
 
-const validator = v.validator(),
-      is = v.Assert;
+var validator = v.validator(),
+    is = v.Assert;
 
 function pick(o, name) {
   return o.hasOwnProperty(name) ? o[name] : '';
@@ -18,7 +18,7 @@ function BTCC(accesskey, secretkey, endpoint) {
   if (!endpoint) {
     endpoint = 'https://api.btcchina.com/api.php/payment';
   } else {
-    winston.info(`switch to endpoint ${endpoint}`);
+    winston.info('switch to endpoint ' + endpoint);
   }
 
   this.BTCC_PAYMENT_ENDPOINT = endpoint;
@@ -26,28 +26,29 @@ function BTCC(accesskey, secretkey, endpoint) {
   this.BTCC_SECRET_KEY = secretkey;
 }
 
+var ORDERED_SIGNATURE_FIELDS = ['tonce', 'accesskey', 'requestmethod', 'id', 'method', 'params'];
 
-const ORDERED_SIGNATURE_FIELDS = ['tonce','accesskey','requestmethod','id','method','params'];
+BTCC.prototype._request = function (params, callback) {
+  var id = tonce = (new Date().getTime() * 1000).toString();
 
-BTCC.prototype._request = function(params, callback) {
-  const id = tonce = (new Date().getTime() * 1000).toString();
+  var accesskey = this.BTCC_ACCESS_KEY,
+      secretkey = this.BTCC_SECRET_KEY,
+      endpoint = this.BTCC_PAYMENT_ENDPOINT;
 
-  const accesskey = this.BTCC_ACCESS_KEY,
-        secretkey = this.BTCC_SECRET_KEY,
-        endpoint = this.BTCC_PAYMENT_ENDPOINT;
-
-  const opts = {
+  var opts = {
     id: id,
-    tonce : tonce,
+    tonce: tonce,
     accesskey: accesskey,
     requestmethod: 'post',
     method: 'createPurchaseOrder',
-    params: params  // Array
+    params: params // Array
   };
 
-  const sha1 = crypto.createHmac('sha1', secretkey);
-  const payload = ORDERED_SIGNATURE_FIELDS.map(n => `${n}=${pick(opts, n)}`).join('&');
-  const signature = sha1.update(payload).digest('hex');
+  var sha1 = crypto.createHmac('sha1', secretkey);
+  var payload = ORDERED_SIGNATURE_FIELDS.map(function (n) {
+    return n + '=' + pick(opts, n);
+  }).join('&');
+  var signature = sha1.update(payload).digest('hex');
 
   request.post(endpoint, {
     headers: {
@@ -61,28 +62,30 @@ BTCC.prototype._request = function(params, callback) {
       sendImmediately: true
     }
   }, callback);
-}
+};
 
-const VALID_PURCHASE_ORDER_OPTIONS = ['price', 'currency', 'notificationURL','returnURL', 'externalKey', 'itemDesc', 'phoneNumber', 'settlementType'];
+var VALID_PURCHASE_ORDER_OPTIONS = ['price', 'currency', 'notificationURL', 'returnURL', 'externalKey', 'itemDesc', 'phoneNumber', 'settlementType'];
 
 // TODO: add number / https validation
-const CREATE_PURCHASE_ORDER_CONSTRAINT = {
-  price: [ is.required() ],
-  currency: [ is.required(), is.isString(), is.choice(['CNY', 'USD', 'SGD', 'MYR', 'BTC'])],
-  notificationURL: [ is.required(), is.isString() ]
+var CREATE_PURCHASE_ORDER_CONSTRAINT = {
+  price: [is.required()],
+  currency: [is.required(), is.isString(), is.choice(['CNY', 'USD', 'SGD', 'MYR', 'BTC'])],
+  notificationURL: [is.required(), is.isString()]
 };
 
 // https://www.btcc.com/apidocs/justpay-payment-gateway-json-rpc-api
-BTCC.prototype.createPurchaseOrder = function(args, callback) {
-  const result = validator.validate(args, CREATE_PURCHASE_ORDER_CONSTRAINT);
+BTCC.prototype.createPurchaseOrder = function (args, callback) {
+  var result = validator.validate(args, CREATE_PURCHASE_ORDER_CONSTRAINT);
   if (result === true) {
-    const params = VALID_PURCHASE_ORDER_OPTIONS.map(n => pick(args, n));
+    var params = VALID_PURCHASE_ORDER_OPTIONS.map(function (n) {
+      return pick(args, n);
+    });
     this._request(params, callback);
   } else {
     winston.warn('createPurchaseOrder parameter validation failed', result);
     // Or render error page ?
     throw result;
   }
-}
+};
 
 module.exports = BTCC;

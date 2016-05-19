@@ -1,8 +1,8 @@
-const express = require('express'),
-      router = express.Router(),
-      winston = require('winston');
+var express = require('express'),
+    router = express.Router(),
+    winston = require('winston');
 
-const HOSTED_ENDPOINT = process.env.HOSTED_ENDPOINT
+var HOSTED_ENDPOINT = process.env.HOSTED_ENDPOINT;
 
 function createCheckout() {
   return [{
@@ -49,44 +49,41 @@ function createCheckout() {
   }, {
     "name": "x_url_callback",
     "text": "URL Callback",
-    "value": `${HOSTED_ENDPOINT}/debug/callback`
+    "value": HOSTED_ENDPOINT + '/debug/callback'
   }, {
     "name": "x_url_cancel",
     "text": "URL Cancel",
-    "value": `${HOSTED_ENDPOINT}/debug/cancel`
+    "value": HOSTED_ENDPOINT + '/debug/cancel'
   }, {
     "name": "x_url_complete",
     "text": "URL Complete",
-    "value": `${HOSTED_ENDPOINT}/debug/finished`
+    "value": HOSTED_ENDPOINT + '/debug/finished'
   }];
 }
 
-
 console.info('Debug enabled !!');
-console.info(`Open "${HOSTED_ENDPOINT}/debug" to do JustPay test`);
+console.info('Open "' + HOSTED_ENDPOINT + '/debug" to do JustPay test');
 
-router.get('/', (req, res, next) => {
+router.get('/', function (req, res, next) {
   res.render('shopify-sim', {
     title: 'Shopify Simulator',
     fields: createCheckout()
   });
 });
 
-router.post('/callback', (req, res, next) => {
+router.post('/callback', function (req, res, next) {
   winston.info('shopify smiulator callback: ', req.body);
   res.send('Checkout confirmed !!!');
 });
 
-router.get('/cancel', (req, res, next) => {
+router.get('/cancel', function (req, res, next) {
   winston.info('shopify smiulator cancel: ', req.query);
   res.send('Checkout cancelled !!!');
 });
 
-router.get('/finished', (req, res, next) => {
+router.get('/finished', function (req, res, next) {
   winston.info('shopify smiulator finished: ', req.query);
   res.send('Deal !!!');
 });
-
-
 
 module.exports = router;
