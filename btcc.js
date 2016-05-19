@@ -84,7 +84,7 @@ BTCC.prototype.createPurchaseOrder = function (args, callback) {
   } else {
     winston.warn('createPurchaseOrder parameter validation failed', result);
     // Or render error page ?
-    throw result;
+    throw new Error('Invalid parameter for JustPay');
   }
 };
 
