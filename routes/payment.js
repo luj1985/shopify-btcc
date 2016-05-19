@@ -88,7 +88,7 @@ router.get('/success/:reference', (req, res, next) => {
       delete trans[reference];
       const id = req.query.purchaseorder_id || new Date().getTime().toString();
 
-      winston.debug('BTCC purcase order id: ', id);
+      winston.debug(`BTCC purcase order id: ${id}`);
 
       shopify.completePurchase(tran, id, (err, storeRes, body) => {
         if (storeRes.statusCode === 200) {
@@ -103,7 +103,7 @@ router.get('/success/:reference', (req, res, next) => {
       // shopifyAsyncConfirm(tran);
       // res.redirect(tran.x_url_complete);
     } else {
-      res.status(400).send('Invalid merchant reference');
+      res.status(400).send(`Invalid merchant reference: ${reference}`);
     }
   }
 });
@@ -111,7 +111,7 @@ router.get('/success/:reference', (req, res, next) => {
 router.post('/notification/:reference', (req, res, next) => {
   const reference = req.params.reference;
   // XXX: This connection was established between Payment Gateway and BTCC JustPay
-  winston.debug(`notification for: ${reference}`, req.body);
+  winston.debug(`notification for: ${reference} received`, req.body);
   res.status(200).send('Notification Got it');
 });
 

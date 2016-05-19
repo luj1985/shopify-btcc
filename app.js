@@ -32,7 +32,6 @@ app.use(session({
   secret: 'btcc',
   cookie: { maxAge: 60 * 60 * 1000 }, // 1h
   resave: false,
-  cookie: { secure: !debug },
   saveUninitialized: true,
 }));
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
